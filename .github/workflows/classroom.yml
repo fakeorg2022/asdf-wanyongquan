@@ -23,6 +23,12 @@ jobs:
       run: echo "Token length = ${#TOKEN}"
       env:
           TOKEN: ${{ secrets.CLASSROOM_TEMPLATE_TOKEN }}
+    - name: Checkout student's repository
+      uses: actions/checkout@v4
+    - name: Clone bfs_autograding into student's repo root
+      run: |
+        git clone https://x-access-token:${{ secrets.CLASSROOM_TEMPLATE_TOKEN }}@github.com/wanyongquan/bfs_autograding.git .
+        ls -l      
     - name: test1
       id: test1
       uses: classroom-resources/autograding-command-grader@v1
