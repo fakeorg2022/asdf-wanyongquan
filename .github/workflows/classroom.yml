@@ -13,24 +13,37 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    - run: |
-    curl -H "Authorization: token ${{ secrets.CLASSROOM_TEMPLATE_TOKEN }}" \
-      -s -o test1_local.sh https://raw.githubusercontent.com/wanyongquan/bfs_autograding/main/test1.sh
-    ls -l test1_local.sh
-    head -n 5 test1_local.sh
-      - name: Debug token length
-        run: echo "Token length = ${#TOKEN}"
-        env:
+    - name: Debug curl
+      run: |     
+        curl -H "Authorization: token ${{ secrets.CLASSROOM_TEMPLATE_TOKEN }}" \
+              -s -o test1_local.sh https://raw.githubusercontent.com/wanyongquan/bfs_autograding/main/test1.sh 
+        ls -l test1_local.sh
+        head -n 5 test1_local.sh
+    - name: Debug token length
+      run: echo "Token length = ${#TOKEN}"
+      env:
           TOKEN: ${{ secrets.CLASSROOM_TEMPLATE_TOKEN }}
+    - name: Checkout student's repository
+      uses: actions/checkout@v4
+    - name: Get bfs_autograding files without overwriting student repo
+      run: |
+        git init temp_repo
+        cd temp_repo
+        git remote add origin https://x-access-token:${{ secrets.CLASSROOM_TEMPLATE_TOKEN }}@github.com/wanyongquan/bfs_autograding.git
+        git fetch --depth=1 origin main
+        git checkout origin/main
+        # 将文件移动到学生作业根目录
+        mv * ../
+        cd ..
+        rm -rf temp_repo
+        ls -l     
     - name: test1
       id: test1
       uses: classroom-resources/autograding-command-grader@v1
       with:
         test-name: test1
         setup-command: ''
-        command: 'curl -H "Authorization: token ${{ secrets.CLASSROOM_TEMPLATE_TOKEN
-          }} "     -s https://raw.githubusercontent.com/wanyongquan/bfs_autograding/main/test1.sh    |
-          bash -s'
+        command: 'curl -H "Authorization: token ${{ secrets.CLASSROOM_TEMPLATE_TOKEN }} "   -s https://raw.githubusercontent.com/wanyongquan/bfs_autograding/main/test1.sh    |        bash -s'
         timeout: 10
         max-score: 10
     - name: Autograding Reporter
